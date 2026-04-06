@@ -1,0 +1,20 @@
+name: celegans-triangles
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - numpy
+  - pandas
+  - matplotlib
+  - scipy
+  - ipython
+  - ipywidgets
+  - jupyterlab
+  - notebook
+  - pip
+  - pip:
+      - mpltern
+      - plotly
+      - networkx
+      - tqdm

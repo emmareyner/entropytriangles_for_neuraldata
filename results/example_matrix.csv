@@ -1,0 +1,7 @@
+;neuron_A;neuron_B;neuron_C;neuron_D;neuron_E;neuron_F
+odor_1;1;1;0;0;1;0
+odor_2;1;1;1;0;1;0
+odor_3;0;1;1;1;0;0
+odor_4;0;0;1;1;0;1
+odor_5;1;0;0;1;1;1
+odor_6;0;1;0;0;1;1
