@@ -1,12 +1,11 @@
-# Triangles, FCA, and perception regimes in the *C. elegans* olfactory sensorium
+# Entropy triangles and concept lattices for the C. elegans olfactory sensorium
 
 This repository contains the code used to study the *C. elegans* odorant–neuron system through:
 
 - Formal Concept Analysis (FCA)
 - entropy triangles (SMET and CMET)
-- similarity-based perception-regime detection across the activation threshold \(\varphi\)
 
-The project is built around a simple idea: instead of looking only at which neuron responds to which odorant, we follow how the whole odorant–neuron relation reorganizes as the activation threshold changes. This makes it possible to compare informational structure, relational structure, and regime structure within a single workflow.
+The project is built around a simple idea: instead of looking only at which neuron responds to which odorant, we follow how the whole odorant–neuron relation reorganizes as the activation threshold changes. This makes it possible to compare informational structure and relational structure within a single workflow.
 
 ## Repository structure
 
@@ -15,12 +14,10 @@ The project is built around a simple idea: instead of looking only at which neur
 ├── src/
 │   ├── calculate_entropies.py
 │   ├── fca.py
-│   ├── similarities.py
 │   ├── utils.py
 │   └── visualize_triangles.py
 ├── notebooks/
 │   ├── virtual_worms.ipynb
-│   ├── perception_regimes.ipynb
 │   └── custom_triangle_playground.ipynb
 ├── contexts/
 ├── results/
@@ -39,9 +36,6 @@ The project is built around a simple idea: instead of looking only at which neur
 - `fca.py`  
   FCA utilities, including concept computation and extent/intent construction.
 
-- `similarities.py`  
-  Similarity, boundary-score, and regime-detection functions. This module contains the Jaccard- and Dice-based comparison logic used for anchor-guided and anchor-free segmentation, as well as the helpers required to build perception regimes from thresholded contexts.
-
 - `utils.py`  
   General project helpers for data loading, virtual worm generation, preprocessing from traces to graded contexts, thresholding into formal contexts, small mapping utilities, and summary plotting.
 
@@ -49,12 +43,6 @@ The project is built around a simple idea: instead of looking only at which neur
 
 - `virtual_worms.ipynb`  
   Builds virtual worms from the graded response data and visualizes the corresponding triangles.
-
-- `perception_regimes.ipynb`  
-  Detects perception regimes from thresholded formal contexts. Includes:
-  - anchor-guided segmentation using Jaccard + \(\Delta\)
-  - anchor-free recursive segmentation used as a robustness check
-  - single-concentration and multi-concentration regime summaries
 
 - `custom_triangle_playground.ipynb`  
   A lightweight playground to experiment with custom ternary plots using the project plotting functions.
@@ -69,8 +57,6 @@ For each concentration and each threshold value \(\varphi\), the graded odorant�
 2. **Entropy triangles**  
    SMET and CMET provide compact information-theoretic summaries of source organization and source–destination transmission.
 
-3. **Perception regimes**  
-   Thresholded contexts are compared along the \(\varphi\)-axis to identify contiguous intervals of structural stability, each summarized by a medoid context.
 
 The result is a framework for moving from graded neural-response data to interpretable statements about sensory organization.
 
@@ -149,23 +135,7 @@ This notebook:
 - computes thresholded contexts across \(\varphi\)
 - visualizes SMET and CMET trajectories
 
-### 2. Perception regimes
-
-Open:
-
-```text
-notebooks/perception_regimes.ipynb
-```
-
-This notebook:
-
-- loads thresholded contexts from `contexts/`
-- computes anchor-guided regime boundaries with Jaccard + \(\Delta\)
-- computes an anchor-free recursive segmentation as a robustness check
-- maps regimes to linear and logarithmic activity scales
-- plots regime summaries for one or several concentrations
-
-### 3. Custom ternary plots
+### 2. Custom ternary plots
 
 Open:
 
@@ -175,21 +145,6 @@ notebooks/custom_triangle_playground.ipynb
 
 This notebook is a lightweight playground to experiment with custom ternary plots using the project plotting functions.
 
-## Main methodological choices
-
-### Anchor-guided regime detection
-
-The main regime analysis is based on:
-
-- Jaccard similarity between thresholded contexts
-- a \(\Delta\)-based groundedness correction to reduce instability in sparse regions
-- triangle-derived anchors to define informative search intervals
-- medoid selection within each regime using ordinary Jaccard similarity
-
-### Anchor-free segmentation
-
-The fully automatic segmentation is used as a robustness check. It removes the anchors and applies a recursive split strategy. Its role is not to replace the anchor-guided analysis, but to test whether a nontrivial regime scaffold is already visible from context-to-context similarity alone.
-
 ## Outputs
 
 The notebooks are written so that each relevant result can be saved explicitly.
@@ -197,26 +152,22 @@ The notebooks are written so that each relevant result can be saved explicitly.
 Typical outputs include:
 
 - CSV tables in `results/`
-  - regime tables
-  - mapped regime summaries
   - custom triangle data
   - direct/FCA-based SMET or CMET tables
 
 - figures in `figures/`
   - entropy triangles
-  - regime bar summaries
   - comparison figures
   - custom ternary plots
 
 ## Notes on interpretation
 
-This repository includes both triangle-based analyses and regime-detection procedures, but they serve different roles.
+This repository includes FCA and triangle-based analyses, but they serve different roles.
 
 - The entropy triangles identify informative structural transitions.
 - FCA reveals the relational organization behind those transitions.
-- The regime analysis formalizes intervals of relative structural stability along the threshold sweep.
 
-The three views are meant to be read together.
+The two views are meant to be read together.
 
 ## Citation
 
@@ -224,15 +175,6 @@ If you use this repository, please cite the associated paper and related methodo
 
 You can replace this section with the exact references you want to expose publicly.
 
-## License
-
-Add the license you want for the public release, for example:
-
-- MIT
-- BSD-3-Clause
-- GPL-3.0
-
-If no license is added, others may not be able to reuse the code legally.
 
 ## Contact
 

@@ -3,14 +3,14 @@ requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "celegans-triangles"
+name = "celegans-entropy-triangles"
 version = "0.1.0"
-description = "Entropy triangles, FCA, and perception-regime analysis for the C. elegans olfactory sensorium"
+description = "Entropy triangles and concept lattices for the C. elegans olfactory sensorium"
 authors = [
   { name = "Emma Reyner-Fuentes" }
 ]
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.8"
 dependencies = [
   "numpy",
   "pandas",
@@ -26,7 +26,6 @@ dependencies = [
 py-modules = [
   "calculate_entropies",
   "fca",
-  "similarities"
   "utils",
   "visualize_triangles"
 ]

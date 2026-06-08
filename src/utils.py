@@ -3,11 +3,7 @@
 This file groups together:
 - data loading helpers
 - virtual worm construction
-- context similarity and regime detection
-- small plotting helpers for regime summaries
 
-The similarity and regime-detection functions are re-exported from
-``similarities.py`` so that previous imports from ``utils`` keep working.
 """
 
 from __future__ import annotations
@@ -22,39 +18,6 @@ import numpy as np
 import pandas as pd
 import scipy.io as sio
 from matplotlib.patches import Patch
-
-from similarities import (
-    vec01,
-    jaccard,
-    activation_density,
-    mean_pairwise_similarity,
-    mean_cross_similarity,
-    jaccard_triangle_context,
-    mean_cross_Delta,
-    delta_confidence,
-    boundary_score_at_split,
-    boundary_score_distribution,
-    baseline_threshold,
-    centroid_profile,
-    best_centroid_in_interval,
-    evaluate_centroid_candidates,
-    best_split_between,
-    compute_best_splits_for_centroids,
-    add_baseline_to_splits,
-    medoid_phi_in_regime,
-    build_perception_regimes,
-    dice_similarity_flat,
-    dice_context,
-    boundary_score_at_split_dice,
-    boundary_score_distribution_dice,
-    best_split_between_dice,
-    absolute_threshold_dice,
-    best_split_with_significance_dice,
-    recursive_splits_dice,
-    absolute_threshold_jaccard,
-    best_split_with_significance_jaccard,
-    recursive_splits_jaccard
-)
 
 
 def load_context_from_file(filename, CONTEXT_DIR):
@@ -221,89 +184,117 @@ def binarize_contexts(contexts, phi=0.256, mode='>='):
     else:
         raise ValueError("mode debe ser '>=' o '<='.")
 
-def phi_to_percent(phi, phi_min, phi_max):
-    return 100.0 * (phi - phi_min) / (phi_max - phi_min)
-
-def phi_to_percent_log(phi, phi_min, phi_max, base=np.e):
-    phi = np.asarray(phi, dtype=float)
-    phi = np.maximum(phi, phi_min)
-    if base == 10:
-        num = np.log10(phi / phi_min)
-        den = np.log10(phi_max / phi_min)
-    else:
-        num = np.log(phi / phi_min)
-        den = np.log(phi_max / phi_min)
-    return 100.0 * (num / den)
-
-def add_conc(df, conc_label):
-    out = df.copy()
-    out['conc'] = conc_label
-    return out
-
 def normalize_conc_label(x):
     s = str(x).strip().lower().replace(' ', '')
     mapping = {'1e-4': '1e-4', '10^-4': '1e-4', '10^{-4}': '1e-4', '104': '1e-4', '4': '1e-4', '1e-5': '1e-5', '10^-5': '1e-5', '10^{-5}': '1e-5', '105': '1e-5', '5': '1e-5', '1e-6': '1e-6', '10^-6': '1e-6', '10^{-6}': '1e-6', '106': '1e-6', '6': '1e-6'}
     return mapping.get(s, s)
 
-def plot_regime_bars(df_all, conc_order=None, xlim=(0, 100), title=None, scale="log", ax=None):
-    if scale == "log":
-        start_col = "pL_start"
-        end_col = "pL_end"
-        width_col = "pL_width"
-        medoid_col = "pL_medoid"
-        xlabel = "ϕ progression (Log %)"
-    elif scale == "linear":
-        start_col = "p_start"
-        end_col = "p_end"
-        width_col = "p_width"
-        medoid_col = "p_medoid"
-        xlabel = "ϕ progression (%)"
-    else:
-        raise ValueError("scale must be either 'log' or 'linear'")
-    
-    df = df_all.copy()
-    df[end_col] = df[end_col].clip(upper=xlim[1])
-    df[start_col] = df[start_col].clip(lower=xlim[0])
-    df[width_col] = df[end_col] - df[start_col]
-    if conc_order is None:
-        conc_order = sorted(df['conc'].unique())
-    ypos = np.arange(len(conc_order))
-    df['conc'], conc_order = (df['conc'].replace({'1e-4': '$10^{-4}$', '1e-5': '$10^{-5}$', '1e-6': '$10^{-6}$'}), ['$10^{-4}$' if str(c).strip() == '1e-4' else '$10^{-5}$' if str(c).strip() == '1e-5' else '$10^{-6}$' if str(c).strip() == '1e-6' else c for c in conc_order])
-    df = df.sort_values(['conc', start_col, 'regime']).reset_index(drop=True)
-    for conc, idx in df.groupby('conc').groups.items():
-        rows = df.loc[idx].sort_values(start_col).index.tolist()
-        prev_end = float(xlim[0])
-        for r in rows:
-            df.loc[r, start_col] = prev_end
-            df.loc[r, width_col] = df.loc[r, end_col] - df.loc[r, start_col]
-            prev_end = float(df.loc[r, end_col])
-    regimes = sorted(df['regime'].unique())
-    cmap = plt.get_cmap('tab10')
-    color_map = {reg: cmap((reg - 1) % 10) for reg in regimes}
-    fig, ax = plt.subplots(figsize=(10, 3.8))
-    for i, conc in enumerate(conc_order):
-        d = df[df['conc'] == conc].sort_values(start_col)
-        for _, row in d.iterrows():
-            ax.barh(y=i, width=row[width_col], left=row[start_col], height=0.55, color=color_map[row['regime']], edgecolor='white', linewidth=1.0)
-            y = i
-            ax.plot([row[start_col], row[start_col]], [y - 0.32, y + 0.32], linewidth=1.2)
-            ax.plot([row[end_col], row[end_col]], [y - 0.32, y + 0.32], linewidth=1.2)
-            ax.scatter([row[medoid_col]], [y], marker='D', facecolors='white', edgecolors='black', s=28, zorder=5)
-            reg = int(row['regime'])
-            if row[start_col] > xlim[0] + 1e-09:
-                ax.text(row[start_col], y + 0.38, f"{row[start_col]:.1f}", ha='center', va='bottom', fontsize=9, zorder=20)
-            if row[end_col] < xlim[1] - 1e-09:
-                ax.text(row[end_col], y + 0.38, f"{row[end_col]:.1f}", ha='center', va='bottom', fontsize=9, zorder=20)
-            ax.annotate(f"{row[medoid_col]:.1f}", xy=(row[medoid_col], y), xytext=(0, 10), textcoords='offset points', ha='center', va='bottom', fontsize=8, zorder=20)
-    ax.set_xlim(*xlim)
-    ax.set_yticks(ypos, conc_order)
-    ax.set_xlabel(xlabel)
-    ax.set_ylabel('Concentration')
-    ax.set_title(title or 'Perception regimes along continuous ϕ (stacked by regime)', pad=25)
-    ax.grid(axis='x', alpha=0.25)
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
-    legend_handles = [Patch(facecolor=color_map[r], edgecolor='none', label=f'Regime {r}') for r in regimes]
-    ax.legend(handles=legend_handles, ncol=1, frameon=True, bbox_to_anchor=(1.02, 1), loc='upper left')
-    plt.tight_layout()
-    plt.show()
+
+def _conc_label(exp: int) -> str:
+    return rf"$10^{{-{exp}}}$"
+
+
+def _conc_exp(label: str) -> int:
+    m = re.search(r"-\{?(\d+)\}?", str(label))
+    if m:
+        return int(m.group(1))
+    nums = re.findall(r"\d+", str(label))
+    if nums:
+        return int(nums[-1])
+    raise ValueError(f"Could not extract concentration exponent from: {label}")
+
+
+def _extract_conc_number(conc_label: str) -> str:
+    nums = re.findall(r"\d+", str(conc_label))
+    if not nums:
+        raise ValueError(f"Could not extract concentration number from: {conc_label}")
+    return nums[-1]
+
+
+def _resolve_phi_columns(df: pd.DataFrame):
+    candidates = [
+        ("phi_start", "phi_end", "phi_medoid"),
+        ("phi_ini", "phi_fin", "phi_medoid"),
+    ]
+    for cols in candidates:
+        if all(c in df.columns for c in cols):
+            return cols
+    raise ValueError(
+        "Could not find phi columns. Expected one of: "
+        "('phi_start','phi_end','phi_medoid') or "
+        "('phi_ini','phi_fin','phi_medoid')."
+    )
+
+
+def _read_context_csv(path: Path) -> pd.DataFrame:
+    try:
+        df_ctx = pd.read_csv(path, sep=";", index_col=0)
+        if df_ctx.shape[1] == 0:
+            raise ValueError
+    except Exception:
+        df_ctx = pd.read_csv(path, sep=",", index_col=0)
+
+    df_ctx = df_ctx.loc[:, ~df_ctx.columns.astype(str).str.contains(r"^Unnamed")]
+    return df_ctx
+
+
+def _count_ones_from_context(df_ctx: pd.DataFrame) -> int:
+    return int(np.count_nonzero(df_ctx.to_numpy()))
+
+
+def _load_context_activation_index(
+    base_dir,
+    selected_concentrations,
+    shape_tag="23x11",
+    semiring="minplus",
+    contexts_dirname="contexts",
+):
+    """
+    Build a lookup:
+        lookup['$10^{-4}$'] -> DataFrame(phi, n1, activation_pct)
+    """
+    lookup = {}
+
+    for conc in selected_concentrations:
+        conc_label = _conc_label(conc)
+        folder = Path(base_dir) / contexts_dirname / f"od_by_neuron{conc}_{shape_tag}_{semiring}"
+
+        if not folder.exists():
+            raise FileNotFoundError(f"Context folder not found: {folder}")
+
+        rows = []
+        for fp in sorted(folder.glob("*.csv")):
+            m = re.search(r"_([+-]?\d*\.?\d+(?:[eE][+-]?\d+)?)\.csv$", fp.name)
+            if m is None:
+                continue
+
+            phi = float(m.group(1))
+            df_ctx = _read_context_csv(fp)
+            n1 = _count_ones_from_context(df_ctx)
+
+            rows.append(
+                {
+                    "phi": phi,
+                    "n1": n1,
+                    "activation_pct": 100.0 * n1 / 253.0,
+                }
+            )
+
+        if not rows:
+            raise ValueError(f"No valid contexts found in: {folder}")
+
+        lookup[conc_label] = (
+            pd.DataFrame(rows)
+            .sort_values("phi")
+            .drop_duplicates(subset=["phi"])
+            .reset_index(drop=True)
+        )
+
+    return lookup
+
+
+def _nearest_activation(phi_target: float, df_lookup: pd.DataFrame, atol: float = 1e-12) -> float:
+    arr = df_lookup["phi"].to_numpy()
+    idx = np.where(np.isclose(arr, phi_target, atol=atol, rtol=0))[0]
+    idx = int(idx[0]) if len(idx) else int(np.argmin(np.abs(arr - phi_target)))
+    return float(df_lookup.iloc[idx]["activation_pct"])
