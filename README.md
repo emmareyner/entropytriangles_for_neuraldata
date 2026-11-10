@@ -2,7 +2,7 @@
 
 This repository contains the code of **CLasIC** (*Concept Lattices as Information Channels*), used to study the *C. elegans* odorant–neuron system by combining:
 
-- Formal Concept Analysis (FCA) of the graded odorant–neuron responses, swept over the threshold of existence φ;
+- K - Formal Concept Analysis (KFCA) of the graded odorant–neuron responses, swept over the threshold of existence φ;
 - multivariate entropy triangles: the Source Multivariate Entropy Triangle (SMET) of odorants and of neurons, and the split Channel Multivariate Entropy Triangle (CMET) from odorants to neurons;
 - random references that separate what is imposed by the closure of FCA, what follows from the margins of each context (neuron specificity, odorant sparseness) and what is specific to the data.
 
