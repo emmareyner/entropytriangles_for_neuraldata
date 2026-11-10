@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.ipynb_checkpoints/
+
+# macOS
+.DS_Store
+
+# Data and generated outputs (the experimental data are not redistributed)
+contexts/*
+!contexts/.gitkeep
+results/*
+!results/example_matrix.csv
+figures/*
+!figures/.gitkeep

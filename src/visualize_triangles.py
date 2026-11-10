@@ -119,13 +119,13 @@ def plot_smet_triangle(df, mode='global_avg', worm_ids=None, neuron=None, accumu
             df_plot = df_plot[df_plot['worm'].astype(int).isin(worm_ids)]
     elif mode == 'one_worm_all':
         if not worm_ids:
-            print('⚠️ Select one worm.')
+            print('Select one worm.')
             return
         if isinstance(worm_ids, int):
             worm_id = worm_ids
         else:
             if len(worm_ids) == 0:
-                print('⚠️ Select at least one worm.')
+                print('Select at least one worm.')
                 return
             worm_id = worm_ids[0]
         df_plot = df[df['name'] != '@AVERAGE'].copy()
@@ -135,7 +135,7 @@ def plot_smet_triangle(df, mode='global_avg', worm_ids=None, neuron=None, accumu
                 if len(neuron) > 0:
                     df_plot = df_plot[df_plot['name'].isin(neuron)]
                 else:
-                    print('⚠️ Select at least one neuron.')
+                    print('Select at least one neuron.')
                     return
             else:
                 df_plot = df_plot[df_plot['name'] == neuron]

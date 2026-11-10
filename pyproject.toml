@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "celegans-entropy-triangles"
-version = "0.1.0"
+version = "0.2.0"
 description = "Entropy triangles and concept lattices for the C. elegans olfactory sensorium"
 authors = [
   { name = "Emma Reyner-Fuentes" }
 ]
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 dependencies = [
   "numpy",
   "pandas",
@@ -22,10 +22,15 @@ dependencies = [
   "jupyter"
 ]
 
+[project.optional-dependencies]
+fast = ["numba"]
+
 [tool.setuptools]
 py-modules = [
   "calculate_entropies",
+  "fastclasic",
   "fca",
+  "randomization",
   "utils",
   "visualize_triangles"
 ]

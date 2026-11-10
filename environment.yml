@@ -1,9 +1,8 @@
 name: celegans-triangles
 channels:
   - conda-forge
-  - defaults
 dependencies:
-  - python=3.11
+  - python=3.12
   - numpy
   - pandas
   - matplotlib
@@ -11,10 +10,7 @@ dependencies:
   - ipython
   - ipywidgets
   - jupyterlab
-  - notebook
+  - numba        # optional: accelerates the closed forms used for large random contexts
   - pip
   - pip:
       - mpltern
-      - plotly
-      - networkx
-      - tqdm
